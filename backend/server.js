@@ -9,10 +9,7 @@ app.use(cors());
 const PORT = process.env.PORT || 3001;
 const MONGO_URI = process.env.MONGO_URI;
 
-mongoose.connect(MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
+mongoose.connect(MONGO_URI)
 .then(() => {
   console.log('Connected to MongoDB');
 })
@@ -21,16 +18,13 @@ mongoose.connect(MONGO_URI, {
 });
 
 const BookSchema = new mongoose.Schema({ title: String });
-const Book = mongoose.model('Book', BookSchema, 'Book');
+const Book = mongoose.model('Book', BookSchema, 'books');
 
 // Seed simple pour test rapide
 app.get('/books', async (req, res) => {
-  const books = await Book.find();
-  if (books.length === 0) {
-    await Book.insertMany([{ title: "Livre A" }, { title: "Livre B" }]);
-  }
-  const allBooks = await Book.find();
+  await Book.deleteMany({});  // Effacer les livres existants (pour tester l'insertion)
+  await Book.insertMany([{ title: "Livre A" }, { title: "Livre B" }]);  // Insérer de nouveaux livres
+  const allBooks = await Book.find();  // Récupérer tous les livres après insertion
   res.json(allBooks);
 });
-
 app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));
